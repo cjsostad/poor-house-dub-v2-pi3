@@ -8,7 +8,8 @@
 # NOTE: Avoids I2S pins (18, 19, 21) used by PCM5102 DAC
 
 # Encoder pins: 5 encoders x 2 pins = 10 pins
-ENCODER_PINS=(17 2 27 22 23 24 20 26 14 13)
+# Pi 3 build: encoder 1 DT moved from GPIO 2 to GPIO 5 (I2C pull-up conflict)
+ENCODER_PINS=(17 5 27 22 23 24 20 26 14 13)
 
 # Switch pins: 4 switches
 SWITCH_PINS=(4 10 15 3)

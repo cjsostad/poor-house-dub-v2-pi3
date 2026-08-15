@@ -33,7 +33,7 @@ struct gpiod_line_request* lineRequest = nullptr;
 
 // All GPIO pins we need to monitor
 const unsigned int ALL_PINS[] = {
-    2, 3, 4, 9, 10, 13, 14, 15, 17, 20, 22, 23, 24, 26, 27
+    3, 4, 5, 9, 10, 13, 14, 15, 17, 20, 22, 23, 24, 26, 27
 };
 const size_t NUM_PINS = sizeof(ALL_PINS) / sizeof(ALL_PINS[0]);
 

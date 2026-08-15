@@ -22,7 +22,8 @@ namespace DubSiren {
 namespace GPIO {
     // Encoder pins (CLK, DT)
     constexpr int ENCODER_1_CLK = 17;
-    constexpr int ENCODER_1_DT = 2;
+    // Pi 3 build: moved off GPIO 2 (I2C SDA has fixed 1.8k pull-up that fights KY-040 modules)
+    constexpr int ENCODER_1_DT = 5;
     constexpr int ENCODER_2_CLK = 27;
     constexpr int ENCODER_2_DT = 22;
     constexpr int ENCODER_3_CLK = 23;

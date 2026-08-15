@@ -9,11 +9,12 @@ the code, the code wins.
 
 A separate note before anything else. This fork was cloned into
 `~/poor-house-dub-v2` and re-hosted on the author's account with fresh history.
-The GPIO 2 to GPIO 5 hardware fix described in section 3 is **still pending in
-this checkout**. The source constant, the `ALL_PINS` array in the C++ file, and
-the encoder list in `gpio_cleanup.sh` all still say `2`. Read section 3 before
-you build. Nothing on GPIO 5 will work until the three edits described there
-are made.
+The GPIO 2 to GPIO 5 hardware fix described in section 3 **has been applied**
+to this checkout — the constant in the header, the `ALL_PINS` array in the
+C++ file, and the encoder list in `gpio_cleanup.sh` all use GPIO 5. Section 3
+is kept in full because the change is the most important local difference
+from upstream, and because any future merge or rebase from
+`parkredding/poor-house-dub-v2` will revert all three edits silently.
 
 ---
 
@@ -131,49 +132,45 @@ config file is the problem.
 ## 3. The GPIO 2 to GPIO 5 modification
 
 This is the single most important local difference between this fork and
-upstream. It is currently **not applied to the source in this checkout** —
-the fork's own physical wiring uses GPIO 5, but the C++ constant, the pin
-array, and the cleanup script still all say `2`. All three must be changed
-together or the build will silently misbehave in one of two ways: either the
-program will read pin 2 (which is not wired anywhere) and Encoder 1 will look
-dead, or `gpio_cleanup.sh` will fail to release pin 5 after a crash and
-subsequent runs will fail to acquire it.
+upstream. The three edits below have been applied to this checkout, but they
+are documented in full because any merge or rebase from upstream will revert
+them silently — and if only one or two of the three are re-applied after a
+merge, the build will misbehave in one of two ways: either the program will
+read pin 2 (which is not wired anywhere) and Encoder 1 will look dead, or
+`gpio_cleanup.sh` will fail to release pin 5 after a crash and subsequent
+runs will fail to acquire it.
 
-### What needs to change
+### What was changed
 
-**1) `cpp/include/Hardware/GPIOController.h`, line 25.** Current source:
+**1) `cpp/include/Hardware/GPIOController.h`, line 25.**
 
 ```cpp
 constexpr int ENCODER_1_CLK = 17;
-constexpr int ENCODER_1_DT = 2;
+constexpr int ENCODER_1_DT = 5;   // was 2 upstream
 ```
 
-Change `2` to `5`.
-
 **2) `cpp/src/Hardware/GPIOController.cpp`, in the `ALL_PINS` array around
-line 38.** Current source:
+line 38.**
 
 ```cpp
 const unsigned int ALL_PINS[] = {
-    2, 3, 4, 9, 10, 13, 14, 15, 17, 20, 22, 23, 24, 26, 27
+    3, 4, 5, 9, 10, 13, 14, 15, 17, 20, 22, 23, 24, 26, 27
 };
 ```
 
-Replace the leading `2` with `5`. Keep the array sorted or the lookup table
-`gpioToLineIndex[28]` still works — the index is by GPIO number, not by
-position — but sorted is easier to read.
+The leading `2` was replaced with `5`. Sort order is preserved; this is a
+readability convention only — the lookup table `gpioToLineIndex[28]` indexes
+by GPIO number, not array position.
 
-**3) `gpio_cleanup.sh`, line 12.** Current source:
+**3) `gpio_cleanup.sh`, line 12.**
 
 ```
-ENCODER_PINS=(17 2 27 22 23 24 20 26 14 13)
+ENCODER_PINS=(17 5 27 22 23 24 20 26 14 13)
 ```
 
-Change the `2` to `5`.
-
-All three edits must land in the same commit. Any merge or rebase from
-upstream `parkredding/poor-house-dub-v2` will revert them silently; add them
-back before rebuilding.
+All three edits must land together. Any merge or rebase from upstream
+`parkredding/poor-house-dub-v2` will revert them silently; re-apply all three
+before rebuilding.
 
 ### Why the change is necessary
 
@@ -228,7 +225,7 @@ lists the physical wiring and the Bank A assignment; Bank B is in section 8.
 
 | Encoder | Bank A parameter  | CLK              | DT                              |
 | ------- | ----------------- | ---------------- | ------------------------------- |
-| 1       | LFO Depth         | GPIO 17 (pin 11) | **GPIO 5 (pin 29)** *— after section 3 patch; source currently says GPIO 2 (pin 3)* |
+| 1       | LFO Depth         | GPIO 17 (pin 11) | GPIO 5 (pin 29) *— section 3 fix, was GPIO 2 upstream* |
 | 2       | Base Frequency    | GPIO 27 (pin 13) | GPIO 22 (pin 15)                |
 | 3       | Filter Frequency  | GPIO 23 (pin 16) | GPIO 24 (pin 18)                |
 | 4       | Delay Feedback    | GPIO 20 (pin 38) | GPIO 26 (pin 37)                |
